@@ -1,22 +1,19 @@
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.gis.db import models
 
 
-@python_2_unicode_compatible
 class GermanGeoArea(models.Model):
     name = models.CharField(_('Name'), max_length=255)
     slug = models.SlugField(_('Slug'), max_length=255)
 
-    kind = models.CharField(_('Kind of Area'), max_length=255,
-        choices=(
-            ('state', _('state')),
-            ('district', _('district')),
-            ('municipality', _('municipality')),
-            ('borough', _('borough')),
-            ('zipcode', _('zipcode')),
-        )
+    kind = models.CharField(_('Kind of Area'), max_length=255, choices=(
+        ('state', _('state')),
+        ('district', _('district')),
+        ('municipality', _('municipality')),
+        ('borough', _('borough')),
+        ('zipcode', _('zipcode')),
     )
+                            )
 
     kind_detail = models.CharField(max_length=255, blank=True)
 
@@ -31,9 +28,7 @@ class GermanGeoArea(models.Model):
 
     geom = models.MultiPolygonField(_('geometry'), geography=True)
 
-    part_of = models.ForeignKey('self', verbose_name=_('Part of'), null=True)
-
-    objects = models.GeoManager()
+    part_of = models.ForeignKey('self', verbose_name=_('Part of'), null=True, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = _('German Geo Area')
@@ -50,11 +45,11 @@ class GermanGeoArea(models.Model):
 
 
 def get_manager(kind_filter):
-    class CustomGeoManager(models.GeoManager):
+    class CustomManager(models.Manager):
         def get_queryset(self):
-            return super(CustomGeoManager, self).get_queryset().filter(kind=kind_filter)
+            return super(CustomManager, self).get_queryset().filter(kind=kind_filter)
 
-    return CustomGeoManager()
+    return CustomManager()
 
 
 class State(GermanGeoArea):
